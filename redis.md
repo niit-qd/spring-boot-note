@@ -1,0 +1,64 @@
+
+1. 启动redis
+    ``` shell
+    redis-server /etc/redis.conf
+    ```
+2. 外网访问
+    修改`/etc/redis.conf`，去掉`bind`配置，或者添加`bind * -::*`。
+    ``` conf
+    ################################## NETWORK #####################################
+
+    # By default, if no "bind" configuration directive is specified, Redis listens
+    # for connections from all available network interfaces on the host machine.
+    # It is possible to listen to just one or multiple selected interfaces using
+    # the "bind" configuration directive, followed by one or more IP addresses.
+    # Each address can be prefixed by "-", which means that redis will not fail to
+    # start if the address is not available. Being not available only refers to
+    # addresses that does not correspond to any network interface. Addresses that
+    # are already in use will always fail, and unsupported protocols will always BE
+    # silently skipped.
+    #
+    # Examples:
+    #
+    # bind 192.168.1.100 10.0.0.1     # listens on two specific IPv4 addresses
+    # bind 127.0.0.1 ::1              # listens on loopback IPv4 and IPv6
+    # bind * -::*                     # like the default, all available interfaces
+    #
+    # ~~~ WARNING ~~~ If the computer running Redis is directly exposed to the
+    # internet, binding to all the interfaces is dangerous and will expose the
+    # instance to everybody on the internet. So by default we uncomment the
+    # following bind directive, that will force Redis to listen only on the
+    # IPv4 and IPv6 (if available) loopback interface addresses (this means Redis
+    # will only be able to accept client connections from the same host that it is
+    # running on).
+    #
+    # IF YOU ARE SURE YOU WANT YOUR INSTANCE TO LISTEN TO ALL THE INTERFACES
+    # COMMENT OUT THE FOLLOWING LINE.
+    #
+    # You will also need to set a password unless you explicitly disable protected
+    # mode.
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # bind 127.0.0.1 -::1
+    bind * -::*
+
+    ```
+
+3. 无密码访问
+    修改`protected-mode`的值为`no`。
+    ``` conf
+    # Protected mode is a layer of security protection, in order to avoid that
+    # Redis instances left open on the internet are accessed and exploited.
+    #
+    # When protected mode is on and the default user has no password, the server
+    # only accepts local connections from the IPv4 address (127.0.0.1), IPv6 address
+    # (::1) or Unix domain sockets.
+    #
+    # By default protected mode is enabled. You should disable it only if
+    # you are sure you want clients from other hosts to connect to Redis
+    # even if no authentication is configured.
+    # protected-mode yes
+    protected-mode no
+    ```
+4. 
+
+
