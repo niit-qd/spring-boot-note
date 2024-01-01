@@ -1,4 +1,7 @@
 
+---
+### redis server的使用
+
 1. 启动redis
     ``` shell
     redis-server /etc/redis.conf
@@ -62,3 +65,67 @@
 4. 
 
 
+---
+### SpringBoot 相关
+
+1. 自动配置
+   `org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration`。
+2. 模板
+    - `RedisTemplate<Object, Object> redisTemplate`
+        引入的时候，必须去掉泛型，或者是`StringRedisTemplate stringRedisTemplate`。
+        指定具体泛型类型的写法是不正确的，例如：`RedisTemplate<String, String> redisTemplate`
+    - `StringRedisTemplate stringRedisTemplate`
+    <br/>
+    `redisTemplate`和`stringRedisTemplate`这两个模板在处理的key的时候，这些项无法相互读取，例如下面
+    ``` java
+    ValueOperations<Object, Object>  valueOperations = redisTemplate.opsForValue();
+    valueOperations.set("test", "" + System.currentTimeMillis());
+    logger.info("get value:{}, {}", "test", valueOperations.get("test"));
+
+    ValueOperations<String,String> stringValueOperations = stringRedisTemplate.opsForValue();
+    stringValueOperations.set("test_string", "" + System.currentTimeMillis());
+    logger.info("get value:{}, {}", "test_string", stringValueOperations.get("test_string"));
+
+    // 下面的取值就是null：
+    logger.info("get value:{}, {}", "test_string", valueOperations.get("test_string"));
+    logger.info("get value:{}, {}", "test", stringValueOperations.get("test"));
+    ```
+    通过使用[AnotherRedisDesktopManager](https://github.com/qishibo/AnotherRedisDesktopManager)工具查看，`redisTemplate`是以二进制形式进行读写的。
+3. 使用Jedis
+    SpringBoot3使用`Lettuce`作为Redis的客户端，如果要使用`Jedis`，如下配置：
+    可以不用注释掉`lettuce-core`。
+    - pom.xml
+        ``` xml
+                <dependency>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-data-redis</artifactId>
+        <!--            <exclusions>-->
+        <!--                <exclusion>-->
+        <!--                    <groupId>io.lettuce</groupId>-->
+        <!--                    <artifactId>lettuce-core</artifactId>-->
+        <!--                </exclusion>-->
+        <!--            </exclusions>-->
+                </dependency>
+                <!-- https://mvnrepository.com/artifact/redis.clients/jedis -->
+                <dependency>
+                    <groupId>redis.clients</groupId>
+                    <artifactId>jedis</artifactId>
+                    <version>4.4.6</version>
+                </dependency>
+        ```
+    - application.yml
+        ``` yaml
+        spring:
+        data:
+            redis:
+            host: x.x.x.x
+            port: 6379
+            database: 0
+            username:
+            password:
+            client-type: jedis
+        ```
+    
+    注意：不要使用`Jedis » 5.x.x`，否则报异常：`java.lang.NoClassDefFoundError: redis/clients/jedis/Queable`。
+    解决方案：暂无。
+4. 
